@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_cheque_form" model="ir.actions.act_window">
+        <field name="name">Cheques</field>
+        <field name="res_model">payment.cheques</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_id" eval="False"/>
+        <field name="domain">[]</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to create a new Transaction.
+            </p>
+            <p>
+                Use this menu to browse previous Transaction.
+            </p>
+        </field>
+    </record>
+    `
+    <record id="view_cheques_tree" model="ir.ui.view">
+        <field name="name">cheques.tree</field>
+        <field name="model">payment.cheques</field>
+        <field name="arch" type="xml">
+            <tree decoration-primary="state=='send'" decoration-success="state=='cleared'"
+                  decoration-danger="state=='bounced'" string="Received Cheques">
+                <field name="issue_date"/>
+                <field name="cheque_no"/>
+                <field name="partner_id"/>
+                <field name="cheque_bank"/>
+                <field name="date"/>
+                <field name="cheque_journal_id"/>
+                <field name="cheque_amount"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_cheques_form" model="ir.ui.view">
+        <field name="name">cheques.form</field>
+        <field name="model">payment.cheques</field>
+        <field name="arch" type="xml">
+            <form string="Register Cheque">
+                <header>
+                    <button name="action_cheque_bounced" type="object" string="Cheque Bounced" class="oe_highlight" attrs="{'invisible':['|', ('state', '!=', 'sent')]}" />
+                    <field name="state" widget="statusbar" statusbar_visible="new,received,send,cleared,bounced"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="id" invisible="1"/>
+                            <field name="cheque_no" attrs="{'readonly':[('state', '!=', 'new')]}"/>
+                            <field name="issue_date" attrs="{'readonly':[('state', '!=', 'new')]}"/>
+                            <field name="partner_type" attrs="{'readonly':[('state', '!=', 'new')]}"/>
+                            <field name="partner_id" attrs="{'readonly':[('state', '!=', 'new')]}"/>
+                            <field name="cheque_journal_id"/>
+                        </group>
+                        <group>
+                            <field name="cheque_bank"/>
+                            <field name="date" attrs="{'readonly':[('state', '!=', 'new')]}"/>
+                            <field name="cheque_amount" attrs="{'readonly':[('state', '!=', 'new')]}"/>
+                            <field name="communication"/>
+                            <field name='pos_session_id' readonly='1'/>
+                            <field name='payment_id' readonly='1'/>
+                            <field name='cheque_clearing_date' readonly='1'/>
+                        </group>
+                    </group>
+                    <notebook attrs="{'invisible':[('state','=','new')]}">
+                        <page string="Cheque date change" name="date_change_ids">
+                            <field name="date_change_ids" context="{'date':date}">
+                                <tree editable="bottom" string="Cheque date change">
+                                    <field name="date_from"/>
+                                    <field name="date_to"/>
+                                    <field name="reason"/>
+                                    <!--<field name="state" invisible="1" />-->
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="cheque_send_to_bank" model="ir.ui.view">
+        <field name="name">check.send.bank</field>
+        <field name="model">payment.cheques.send.bank</field>
+        <field name="arch" type="xml">
+            <form string="Send to bank">
+                <group>
+                    <field name="employee_id"/>
+                </group>
+                <footer>
+                    <button name="send_to_bank" class="oe_highlight" string="Send to bank"
+                            type="object"/>
+                    <button string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_send_to_bank_multi" model="ir.actions.act_window">
+        <field name="name">Send to Bank</field>
+        <field name="res_model">payment.cheques.send.bank</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_cheque_details"
+              name="Cheques"
+              sequence="2" parent="account.menu_finance"/>
+    <menuitem id="menu_cheque_create_action" action="action_cheque_form"
+              name="Register Cheques" parent="menu_cheque_details"/>
+</odoo>
